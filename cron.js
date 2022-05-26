@@ -1,22 +1,39 @@
-const { exec } = require("child_process");
-var cron = require('node-cron');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
+const cron = require('node-cron');
+const fs = require('fs');
+require('log-timestamp');
 
-function main(){
-  exec("sh " +  __dirname + "/run.sh > alfredo.log", (error, stdout, stderr) => {
-    if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-    }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
-    console.log(`stdout: ${stdout}`);
-});
+
+let configRawdata = fs.readFileSync(__dirname + '/src/config/config.json');
+let config = JSON.parse(configRawdata);
+
+async function main() {
+  await _exec("rm -rf " + __dirname + "/temp/*")
+  await _exec("py " + __dirname + "/src/py/getTransactions.py")
+  await _exec("py " + __dirname + "/src/py/getTransactionsTicket.py")
+  await _exec("py " + __dirname + "/src/py/writeJSON.py")
+  await _exec("node " + __dirname + "/src/node/report.js")
+  _exec("node " + __dirname + "/src/node/server.js")
+  await _exec("cp -R " + __dirname + "/src/node/public/* " + config.staticContentDir)
+  await _exec("sh " + __dirname + "/run.sh " + config.staticContentDir)
 }
+
+async function _exec(cmd) {
+  try {
+    const { stdout, stderr } = await exec(cmd);
+    console.log(stdout);
+    if (stderr)
+      console.log(stderr);
+  } catch (e) {
+    console.error(e); // should contain code (exit code) and signal (that caused the termination).
+  }
+}
+
+
 
 cron.schedule("*/30 * * * *", function() {
     console.log("running a task every 30 minute");
     main()
   });
-  main()
+main()
