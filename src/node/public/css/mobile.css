@@ -72,3 +72,7 @@
   .tab-pane{
       min-height: 400px;
   }
+
+  .buildTime-div{
+    margin-bottom: 15px;
+  }

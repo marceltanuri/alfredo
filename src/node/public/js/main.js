@@ -138,7 +138,7 @@ function buildReport(json) {
 }
 );
 
-
+document.querySelector("#buildTime").innerText = buildTime
 
 function breakLines(elem, times) {
     let count = 1

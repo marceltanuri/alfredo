@@ -90,6 +90,14 @@ function main() {
             console.error(err);
         }
     });
+
+    let buildtime = `const buildTime = "${new Date().toGMTString()}"`
+    fs.writeFile(__dirname + '/public/data/buildTime.js', buildtime, err => {
+        if (err) {
+            console.error(err);
+        }
+    });
+
 }
 
 main();
