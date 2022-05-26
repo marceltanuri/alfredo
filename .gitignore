@@ -9,3 +9,4 @@ budget.json
 chrome_data/
 data/
 nohup.out
+*.log
