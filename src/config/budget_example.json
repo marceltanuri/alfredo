@@ -1,0 +1,118 @@
+{
+    "data": [
+        {
+            "desc": "Mercado",
+            "limit": 400,
+            "regex": [
+                "PINGO DOCE",
+                "CONTINENTE",
+                "LIDL",
+                "TALHO"
+            ]
+        },
+        {
+            "desc": "TakeAway",
+            "limit": 100,
+            "regex": [
+                "CAFETARIA BRAZIL",
+                "PAYPAL GLOVO",
+                "PAYPAL PMNTSBVEATS",
+                "JERONYMO ALMADA",
+                "BURGER KING",
+                "BATIKANOS",
+                "CAFETARIA",
+                "SUSHI",
+                "MCD ",
+                "LOS TAKITOS",
+                "MCDONALD",
+                "BAGGA",
+                "2BURGER",
+                "GAYA GELATO",
+                "HARABS ESFIRRARIA",
+                "HARAB S ESFIRRARIA",
+                "TACO BELL",
+                "STARBUCKS",
+                "GIORNO",
+                "CPPB - "
+            ]
+        },
+        {
+            "desc": "Transportes",
+            "limit": 60,
+            "regex": [
+                "BAIXA CHIADO LISBOA",
+                "SERVICO GALP",
+                "UBERPAYMENT",
+                "SERVICO REBOLA E FILHO",
+                "SERVICO REPSOL",
+                "TT TRANSTEJO",
+                "TERMINAL FLUVIAL",
+                "Barreiro      Hosp Distrital",
+                "PETROROTUNDA",
+                "TRANSTEJO"
+            ]
+        },
+        {
+            "desc": "Lazer",
+            "limit": 13.49,
+            "regex": [
+                "CINEMAS",
+                "snooker",
+                "*****6382",
+                "KOTO MONTIJO",
+                "TICKET LINE"
+            ]
+        },
+        {
+            "desc": "Farmacia",
+            "limit": 20,
+            "regex": [
+                "FARMACIA",
+                "FARM UN MUT",
+                "WELL S MONTIJO"
+            ]
+        },
+        {
+            "desc": "Moradia",
+            "regex": [
+                "NOS Comunicacoe",
+                "EDP COMERCIAL",
+                "Antonio Luis Correia Natal Maldonado",
+                "PAG SERV 21557"
+            ]
+        },
+        {
+            "desc": "Compras",
+            "limit": 160,
+            "regex": [
+                "LEV ATM 3915 BKINT Montijo",
+                "LEFTIES",
+                "PRIMARK",
+                "COMPRA 3915 CTT",
+                "FNAC"
+            ]
+        },
+        {
+            "desc": "Prestacoes",
+            "regex": [
+                "TRF P/ Adriana",
+                "PAG-ESTADO",
+                "Ordem Pagamento s/Estrangeiro"
+            ]
+        }
+    ],
+    "incomings": [
+        {
+            "name": "ticket",
+            "value": 800
+        },
+        {
+            "name": "ajuda de custo",
+            "value": 15000
+        },
+        {
+            "name": "salário",
+            "value": 50000
+        }
+    ]
+}
