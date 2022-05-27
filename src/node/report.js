@@ -1,19 +1,9 @@
 const model = require('./model/classes.js')
-const clc = require('cli-color');
-const Pie = require("cli-pie");
-const fs = require('fs');
 const CryptoJS = require("crypto-js");
-
-
-function breakLines(times) {
-    let count = 1
-    do {
-        console.log("====================================================")
-    } while (++count <= times)
-
-}
+const fs = require('fs');
 
 function main() {
+    
     let transactions = new model.Transactions()
 
     // Export transactions as encripted JSON format. This JSON will be read by a static web app

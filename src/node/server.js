@@ -2,8 +2,6 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const router = express.Router();
-const transactions = require('./model/classes')
-const open = require('better-opn');
 var mobile = require('is-mobile');
 
 let port = 3000
@@ -27,6 +25,3 @@ app.use('/', router);
 app.listen(process.env.port || port);
 
 console.log(`Running at Port ${port}`);
-
-let url = `http://localhost:${port}/`
-open(url);

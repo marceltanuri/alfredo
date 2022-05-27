@@ -9,14 +9,14 @@ let configRawdata = fs.readFileSync(__dirname + '/src/config/config.json');
 let config = JSON.parse(configRawdata);
 
 async function main() {
-  await _exec("rm -rf " + __dirname + "/temp/*")
-  await _exec("py " + __dirname + "/src/py/getTransactions.py")
-  await _exec("py " + __dirname + "/src/py/getTransactionsTicket.py")
-  await _exec("py " + __dirname + "/src/py/writeJSON.py")
-  await _exec("node " + __dirname + "/src/node/report.js")
-  _exec("node " + __dirname + "/src/node/server.js")
-  await _exec("cp -R " + __dirname + "/src/node/public/* " + config.staticContentDir)
-  await _exec("sh " + __dirname + "/run.sh " + config.staticContentDir)
+  await _exec(`rm -rf ${__dirname}/temp/*`)
+  await _exec(`python ${__dirname}/src/py/getTransactions.py`)
+  await _exec(`python ${__dirname}/src/py/getTransactionsTicket.py`)
+  await _exec(`python ${__dirname}/src/py/writeJSON.py`)
+  await _exec(`node ${__dirname}/src/node/report.js`)
+  _exec(`node ${__dirname}/src/node/server.js`)
+  await _exec(`cp -R ${__dirname}/src/node/public/*  ${config.staticContentDir}`)
+  await _exec(`sh ${__dirname}/publish.sh  ${config.staticContentDir}`)
 }
 
 async function _exec(cmd) {
@@ -26,11 +26,9 @@ async function _exec(cmd) {
     if (stderr)
       console.log(stderr);
   } catch (e) {
-    console.error(e); // should contain code (exit code) and signal (that caused the termination).
+    console.error(e);
   }
 }
-
-
 
 cron.schedule("*/30 * * * *", function() {
     console.log("running a task every 30 minute");
