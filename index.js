@@ -17,6 +17,7 @@ async function main() {
   _exec(`node ${__dirname}/src/node/server.js`)
   await _exec(`cp -R ${__dirname}/src/node/public/*  ${config.staticContentDir}`)
   await _exec(`sh ${__dirname}/publish.sh  ${config.staticContentDir}`)
+  console.log("Completed")
 }
 
 async function _exec(cmd) {
@@ -30,8 +31,12 @@ async function _exec(cmd) {
   }
 }
 
-cron.schedule("*/30 * * * *", function() {
-    console.log("running a task every 30 minute");
-    main()
-  });
+if(config.cron){
+  console.log("scheduled execution is enabled")
+  cron.schedule(config.cron, function() {
+      console.log("running a task with cron " + config.cron);
+      main()
+    });
+}
+
 main()
