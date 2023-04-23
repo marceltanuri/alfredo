@@ -1,4 +1,4 @@
-const model = require('./model/classes.js')
+const model = require('../model/classes.js')
 const CryptoJS = require("crypto-js");
 const fs = require('fs');
 

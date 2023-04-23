@@ -2,7 +2,7 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const cron = require('node-cron');
 const fs = require('fs');
-const buildTransactionsFile = require('./src/node/ReportController.js')
+const buildTransactionsFile = require('./src/node/controller/ReportController.js')
 const startServer = require('./src/node/server.js')
 require('log-timestamp');
 

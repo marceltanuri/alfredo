@@ -150,7 +150,7 @@ class ReportDataBuilder {
         return totalSaved
     }
 
-    getBalances() {
+    getBalances(formatter) {
 
         let balances = { sources: [] }
         let sum = 0.0
@@ -159,11 +159,11 @@ class ReportDataBuilder {
             let transactionsSourceName = Object.keys(transactionsSource)[0]
             let transactionsSourceValue = Object.values(transactionsSource)[0]
 
-            balances.sources.push({ "name": transactionsSourceName, "total": transactionsSourceValue.totalBalance })
+            balances.sources.push({ "name": transactionsSourceName, "total": formatter.format(transactionsSourceValue.totalBalance) })
             sum += parseFloat(transactionsSourceValue.totalBalance)
         }
 
-        balances.sum = sum
+        balances.sum = formatter.format(sum)
 
         return balances
     }
@@ -214,7 +214,7 @@ class ReportDataBuilder {
         json.totals.gross = formatter.format(this.getGroupExpensesSum())
         json.totals.previewedExpenses = formatter.format(this.getLimitSum())
         json.totals.realExpenses = formatter.format(this.getGroupAvailableValueSum() - this.getGroupExpensesSum())
-        json.totals.balances = this.getBalances()
+        json.totals.balances = this.getBalances(formatter)
 
         console.log(json.totals)
 
