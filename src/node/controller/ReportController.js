@@ -10,14 +10,14 @@ module.exports = async function buildTransactionsFile() {
         var encriptedJSON = CryptoJS.AES.encrypt(JSON.stringify(t.toJSON()), process.env.alfredo_json_crypto_key);
         let jsonVariable = `const transactions = "${encriptedJSON}"`
         console.log("Exporting report as static content...")
-        fs.writeFile(__dirname + '/public/data/transactions.js', jsonVariable, err => {
+        fs.writeFile(__dirname + '/../public/data/transactions.js', jsonVariable, err => {
             if (err) {
                 console.error(err);
             }
         });
 
         let buildtime = `const buildTime = "${new Date().toGMTString()}"`
-        fs.writeFile(__dirname + '/public/data/buildTime.js', buildtime, err => {
+        fs.writeFile(__dirname + '/../public/data/buildTime.js', buildtime, err => {
             if (err) {
                 console.error(err);
             }
