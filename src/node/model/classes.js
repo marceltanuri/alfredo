@@ -28,7 +28,7 @@ class ReportDataBuilder {
         bankTransactionsReader.close()
 
         this.transactionsSources.push({ "bank": bankTransactions })
-        
+
         // TODO filter transactions according to the report period (startDate - endDate)
         console.log(this.transactionsSources)
 
@@ -226,6 +226,7 @@ class ReportDataBuilder {
         return json
     }
 }
+
 
 class ExpenseGroup {
     constructor(cat) {

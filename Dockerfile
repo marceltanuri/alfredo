@@ -24,4 +24,4 @@ RUN npm install
 COPY . .
 
 EXPOSE 3000
-CMD xvfb-run --server-args="-screen 0 1024x768x24" npm start
+ENTRYPOINT ["/bin/sh", "-c" , "xvfb-run --server-args=\"-screen 0 1024x768x24\" npm start"]
