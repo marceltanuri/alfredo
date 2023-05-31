@@ -1,55 +1,39 @@
-const e = require('express');
-const fs = require('fs');
-const Itau = require('./bankTransactionReader/impl/itau/Itau');
-const BankTransactionsReaderFactory = require('./bankTransactionReader/BankTransactionsReaderFactory');
+const ExpenseGroup = require("./ExpenseGroup")
+const Incoming = require("./Incoming")
 
-class ReportDataBuilder {
+module.exports = class ReportModel {
 
     budget = {}
     transactionsSources = []
     balance = 0.0
     expensesGroup = []
+    incomings = []
+    estimatedIncomings = []
 
-    #setBudget(jsonFile) {
-        this.budget = JSON.parse(jsonFile);
+
+
+    setBudget(budget) {
+        this.budget = budget
     }
 
-    async init() {
+    setTransactionsSources (transactionsSources) {
+        this.transactionsSources = transactionsSources
+    }
 
-        const budgetFile = __dirname + '/../../config/budget.json';
-        this.#setBudget(fs.readFileSync(budgetFile))
 
-        const bankTransactionsReader = BankTransactionsReaderFactory.getBankTransactionsReader()
-
-        let bankTransactions = await bankTransactionsReader.init()
-            .then(res => res.doAuth()
-                .then(res => res.getBalance()))
-
-        bankTransactionsReader.close()
-
-        this.transactionsSources.push({ "bank": bankTransactions })
-
-        // TODO filter transactions according to the report period (startDate - endDate)
-        console.log(this.transactionsSources)
-
-        // TODO add ticketTransactions to transactionsSource
-        // this.transactionsSources.push({ "ticket": ticketTransactions })
-
-        // incomings
-        this.estimatedIncomings = this.budget.incomings
+    classifyExpensesAndIncomings() {
+        this.expensesGroup = []
         this.incomings = []
 
-        // load expensesGroup based on budget data
-        this.expensesGroup = []
         this.budget.data.forEach(cat => {
             this.expensesGroup.push(new ExpenseGroup(cat))
         })
 
+        this.estimatedIncomings = this.budget.incomings
+
         for (const transactionsSource of this.transactionsSources) {
 
             let transactionsSourceValue = Object.values(transactionsSource)[0]
-
-            console.log(transactionsSourceValue)
 
             transactionsSourceValue.transactions.filter(transaction => transaction.type === "expense").forEach(debtTransaction => {
                 this.addExpenseToExpenseGroupUsingExpDescriptionAndGroupRegexConfig(debtTransaction.description, debtTransaction.date, debtTransaction.value)
@@ -60,9 +44,6 @@ class ReportDataBuilder {
             })
 
         }
-
-        console.log(this.expensesGroup)
-        return this
     }
 
     getIncomingsSum() {
@@ -216,7 +197,7 @@ class ReportDataBuilder {
         json.totals.realExpenses = formatter.format(this.getGroupAvailableValueSum() - this.getGroupExpensesSum())
         json.totals.balances = this.getBalances(formatter)
 
-        console.log(json.totals)
+        console.log(json.totals.balances)
 
         json.incomings = {}
         json.estimatedIncomings = this.getEstimatedIncomings()
@@ -226,110 +207,3 @@ class ReportDataBuilder {
         return json
     }
 }
-
-
-class ExpenseGroup {
-    constructor(cat) {
-        this.name = cat.desc
-        this.default = cat.default
-        this.regex = cat.regex
-        if (cat.limit != undefined)
-            this.limit = cat.limit
-        if (cat.fixed_expenses != undefined) {
-            this.fixedExpenses = cat.fixed_expenses
-            let limit = 0
-            cat.fixed_expenses.forEach(exp => {
-                limit += parseFloat(exp.value)
-            })
-            this.limit = limit
-        }
-
-        this.expenses = []
-    }
-
-    addExpense(desc, date, value) {
-        this.expenses.push(new Expense(this.name, desc, date, value))
-    }
-
-    /**
-     * 
-     * @returns FixedExpenses enhanced list containing the boolean value isPaid
-     */
-    getFixedExpenses() {
-        if (this.fixedExpenses != undefined) {
-            let _fixedExpenses = this.fixedExpenses
-            _fixedExpenses.forEach(fixexp => {
-                fixexp.paid = this.isFixedExpensePaid(fixexp)
-            })
-            return _fixedExpenses
-        }
-    }
-
-    /**
-     * 
-     * @param {*} fixedExpense 
-     * @returns true if FixedExpense value is equals to any expense value and at least one word of FixedExpense name is found in any expense description.
-     */
-    isFixedExpensePaid(fixedExpense) {
-
-        this.expenses.filter(exp => {
-            return exp.value == (fixedExpense.value * -1)
-        })
-
-        let _paid = false
-        this.expenses.forEach(exp => {
-            if (exp.value == (fixedExpense.value * -1)) {
-                let _words = fixedExpense.name.toLowerCase().split(" ")
-                _words.forEach(word => {
-                    if (exp.description.toLowerCase().includes(word.toLowerCase())) {
-                        _paid = true
-                        return _paid
-                    }
-                })
-            }
-        })
-        return _paid
-    }
-
-    getExpensesSum() {
-        let sum = 0.0
-        this.expenses.forEach(elm => { sum = sum + parseFloat(elm.value) })
-        return sum
-    }
-
-    getExpenseSumPercentage() {
-        return Math.round((this.getExpensesSum() * -1) / this.limit * 100).toPrecision(3)
-    }
-
-    getAvailableValuePercentage() {
-        return Math.round(100 - (this.getExpensesSum() * -1) / this.limit * 100).toPrecision(3)
-    }
-
-    // returns expenses list sorted by date
-    getExpenses() {
-        const sortedExpeneses = this.expenses.slice().sort((a, b) => (new Date(a.date.replace(/(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3")) - new Date(b.date.replace(/(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3"))))
-        return sortedExpeneses
-    }
-
-    getAvailableValue() {
-        return parseFloat(this.limit) + this.getExpensesSum()
-    }
-}
-class Expense {
-    constructor(group, description, date, value) {
-        this.group = group
-        this.description = description
-        this.date = date
-        this.value = value
-    }
-}
-
-class Incoming {
-    constructor(description, date, value) {
-        this.description = description
-        this.date = date
-        this.value = value
-    }
-}
-
-module.exports.Transactions = ReportDataBuilder;

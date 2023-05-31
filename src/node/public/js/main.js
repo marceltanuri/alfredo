@@ -5,9 +5,28 @@ var formatter = new Intl.NumberFormat('pt-PT', {
 
 let chartData = [['Category', 'Total']]
 
-function buildReport(json) {
+document.addEventListener("DOMContentLoaded", function (e) {
+    fetch("/transactions").then(res => {
+        res.json().then(json => {
+            document.querySelector(".container-loading").style.display="none"
+            document.querySelector(".container-report").style.display = 'block'
+            buildReport(json)
+            
+            fetch("/lastReportUpdate").then(res => {
+                res.json().then(json => {
+                    document.querySelector("#buildTime").innerText = json.lastReportUpdate
+                })
+            })
 
-    document.querySelector(".container-report").style.display = 'block'
+        })
+    })
+
+
+
+    
+})
+
+function buildReport(json) {
 
     json.expensesGroup.forEach(expenseGroup => {
 
@@ -93,7 +112,8 @@ function buildReport(json) {
 
     _totalsDiv.innerHTML = _innerHTML
 
-    chartData.push(['Saldo', parseFloat(json.totals.available.replace('R$', '').replace(',', '.'))])
+    chartData.push(['Saldo', parseFloat(json.totals.available.replace('R$', '').replace('.', '').replace(',', '.'))])
+    console.log(chartData)
 
     let _innerHTMLIncomings = ""
     json.incomings.data.forEach(incoming => {
@@ -124,23 +144,6 @@ function buildReport(json) {
         console.error(e)
     }
 }
-
-['input'].forEach(evt => {
-    document.querySelector("#password").addEventListener(evt, function () {
-        try {
-            let decryptedJSON = CryptoJS.AES.decrypt(transactions, this.value).toString(CryptoJS.enc.Utf8)
-            buildReport(JSON.parse(decryptedJSON.toString(CryptoJS.enc.Utf8)))
-            document.querySelector(".loading").style.display = 'none'
-            return;
-        }
-        catch {
-
-        }
-    })
-}
-);
-
-document.querySelector("#buildTime").innerText = buildTime
 
 function breakLines(elem, times) {
     let count = 1

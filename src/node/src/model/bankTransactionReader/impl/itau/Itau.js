@@ -3,8 +3,9 @@ const CampoTeclado = require('./CampoTeclado.js');
 const Transactions = require('../../../Transactions.js');
 const Transaction = require('../../../Transaction.js');
 const BankTransactionReader = require('../../BankTransactionReader.js');
+const DateUtil = require('../../../../util/DateUtil.js')
 
-module.exports = class Itau extends BankTransactionReader{
+module.exports = class Itau extends BankTransactionReader {
 
     #AUTH_START_PAGE_URL = "https://www.itau.com.br/contas/conta-corrente"
     #TRANSACTION_PERIOD_IN_DAYS = "60";
@@ -13,6 +14,7 @@ module.exports = class Itau extends BankTransactionReader{
     page = null
 
     async init() {
+
         this.browser = await puppeteer.launch(
             {
                 headless: false,
@@ -62,34 +64,34 @@ module.exports = class Itau extends BankTransactionReader{
 
     async #waitAndClick(selector) {
         await this.page.waitForFunction(
-          `document.querySelector('${selector}') && document.querySelector('${selector}').clientHeight != 0`,
-          { visible: true },
+            `document.querySelector('${selector}') && document.querySelector('${selector}').clientHeight != 0`,
+            { visible: true },
         );
         await this.page.evaluate((selector) => document.querySelector(selector).click(), selector)
-      }
+    }
 
-      async #waitAndSelect(selector, option) {
+    async #waitAndSelect(selector, option) {
         await this.page.waitForFunction(
-          `document.querySelector('${selector}') && document.querySelector('${selector}').clientHeight != 0`,
-          { visible: true },
+            `document.querySelector('${selector}') && document.querySelector('${selector}').clientHeight != 0`,
+            { visible: true },
         )
 
         await this.page.evaluate((option, selector) => {
             let selectElem = document.querySelector(selector)
             let optionElem = document.querySelector(selector + ` > option[value='${option}']`)
             optionElem.selected = true;
-            const event = new Event('change', {bubbles: true});
+            const event = new Event('change', { bubbles: true });
             selectElem.dispatchEvent(event);
         }, option, selector);
-      }
+    }
 
-      async #waitAndReturn(selector) {
+    async #waitAndReturn(selector) {
         await this.page.waitForFunction(
-          `document.querySelector('${selector}') && document.querySelector('${selector}').clientHeight != 0`,
-          { visible: true },
+            `document.querySelector('${selector}') && document.querySelector('${selector}').clientHeight != 0`,
+            { visible: true },
         );
         return await this.page.$$(selector)
-      }
+    }
 
     async #submitPasswordChallengeForm() {
 
@@ -138,7 +140,7 @@ module.exports = class Itau extends BankTransactionReader{
         await this.#waitAndClick('#saldo-extrato-card-accordion')
         await this.#waitAndClick('button[aria-label="ver extrato"]')
 
-        await this.#waitAndSelect("#select-78",this.#TRANSACTION_PERIOD_IN_DAYS)
+        await this.#waitAndSelect("#select-78", this.#TRANSACTION_PERIOD_IN_DAYS)
 
         const transactionsSelector = '#corpoTabela-gridLancamentos-pessoa-fisica > tr:not(.linha-descricao-mes-ano, .linha-tabela-lancamentos-pf-saldo-dia)'
         await this.page.waitForSelector(transactionsSelector);
@@ -146,9 +148,9 @@ module.exports = class Itau extends BankTransactionReader{
 
         const totalBalanceSelector = '#cor-valor-saldo-box'
         await this.page.waitForSelector(totalBalanceSelector);
-        
+
         let totalBalance = await (await (await this.page.$(totalBalanceSelector)).getProperty("innerText")).jsonValue()
-        totalBalance = totalBalance.replace("R$ ", "").replace(".","").replace(",",".")
+        totalBalance = totalBalance.replace("R$ ", "").replace(".", "").replace(",", ".")
 
         let transactionsObj = new Transactions(totalBalance)
 
@@ -157,18 +159,22 @@ module.exports = class Itau extends BankTransactionReader{
 
             let date = await (await data[0].getProperty("innerText")).jsonValue()
             let desc = await (await data[1].getProperty("innerText")).jsonValue()
-            
-            let value = await (await data[2].getProperty("innerText")).jsonValue()
-            value = value.replace(".","").replace(",",".")
 
-            console.log(`adding transaction: date: ${date}, desc: ${desc}, value: ${value}`)
-            transactionsObj.addTransaction(new Transaction(date, desc, value))
+            let value = await (await data[2].getProperty("innerText")).jsonValue()
+            value = value.replace(".", "").replace(",", ".")
+
+            let dateDayMonthYearArray = date.split("/")
+            let dateObj = new Date(dateDayMonthYearArray[2], parseInt(dateDayMonthYearArray[1]) -1 , dateDayMonthYearArray[0])
+            if (dateObj.getTime() >= DateUtil.getReportStartDateInMillis()){
+                console.log(`Adding transaction: date: ${date}, desc: ${desc}, value: ${value}`)
+                transactionsObj.addTransaction(new Transaction(date, desc, value))
+            }
         }
 
         return transactionsObj;
     }
 
-    async close(){
+    async close() {
         await this.browser.close()
     }
 
